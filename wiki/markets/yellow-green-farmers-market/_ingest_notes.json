@@ -1,0 +1,31 @@
+{
+  "schema_version": "1",
+  "entity_type": "market",
+  "entity_slug": "yellow-green-farmers-market",
+  "ingested_at": "2026-05-25T00:00:00Z",
+  "notes": [
+    {
+      "type": "gap",
+      "field": "vendor_list",
+      "message": "Vendor map at https://ygfarmersmarket.com/map requires JavaScript to render (ExpoFP) — not captured during crawl. vendors.md contains no vendor entries.",
+      "remediation": "js_crawl",
+      "severity": "blocking"
+    },
+    {
+      "type": "provenance",
+      "field": "latitude",
+      "message": "Latitude 26.0304714 extracted from Google Maps URL in homepage, not stated directly in page text.",
+      "remediation": null,
+      "method": "extracted_from_google_maps_url",
+      "source_url": "https://www.google.com/maps/dir//26.0304714,-80.1694032"
+    },
+    {
+      "type": "provenance",
+      "field": "longitude",
+      "message": "Longitude -80.1694032 extracted from Google Maps URL in homepage, not stated directly in page text.",
+      "remediation": null,
+      "method": "extracted_from_google_maps_url",
+      "source_url": "https://www.google.com/maps/dir//26.0304714,-80.1694032"
+    }
+  ]
+}
