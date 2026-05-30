@@ -20,18 +20,18 @@ You want to collect knowledge about farmer's market, their location, timing, ven
 
 The information you need is
 - Farmers Market Name
-- Address
+- Address (may be "Address not found")
 - City
-- Latitude
-- Longitude
-- Timing  
-- ZIP
+- Latitude (leave empty if not found)
+- Longitude (leave empty if not found)
+- Timing (may be "Hours not found")
+- ZIP (leave empty if not found)
 - URL
 - Description
 - Type : Can be indoor, outdoor, mixed
 - Logo : URL of the market's logo image (optional)
 - Tags: Like "producer_only", "historic", etc
-- Notes: For example ["Address not found" , "Hours not found"]
+- Notes: Collect all "not found" signals here, e.g. ["Address not found", "Hours not found"]
 
 In general a farmer market has many vendors. A vendor can be in multiple markets. A vendor has many products.
 
@@ -49,8 +49,8 @@ Purpose:
 - Support market-centric queries such as:
     - Which vendors sell at a market?
     - What products does a vendor sell at a market?
-- Support vendor-centric queries by scanning all market `vendors.md` files:
-    - Which markets does a vendor attend? (requires scanning all markets)
+- Support vendor-centric queries by scanning all selected market `vendors.md` files (like near me):
+    - Which markets does a vendor attend? (requires scanning all nearby markets)
 
 Identity Rules:
 

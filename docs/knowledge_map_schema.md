@@ -14,15 +14,17 @@ markets
 ```
 ## Registries
 Each registry assigns a global id to the entity.
-It has 3 fields
-- id : Unique id of the entity. Cannot be duplicate
-  
-- name: Name of the entity. Can be duplicate.
-  
+It has 4 fields
+- id : Unique id of the entity. Cannot be duplicate.
+
+- name: Canonical name of the entity. Can be duplicate across entries.
+
+- aliases: Optional list of alternate names the entity is known by (e.g. slight spelling variations, former names). Empty list if none.
+
 - dedupe_key: Information used by the agent to distinguish entities that have the same name.  
   If the dedupe_key is missing or empty then it means that there are no duplicate name entries. 
 
-The flow for an agent is to use `name` as the candidate finder and then `dedupe_key` as the match confirmer.
+The flow for an agent is to search `name` first, then `aliases`, and use `dedupe_key` as the match confirmer.
 
 ### market_registry.jsonl
 Assigns the unique id to a farmer's market. 
@@ -48,7 +50,8 @@ The agent must first search this to discover the vendor before creating a new ve
 
 IDs must be `snake_case` with no spaces. A numeric suffix (`_001`) is appended when needed to disambiguate entries with identical base slugs.
 ```
-{"id": "apex_food_company_001", "name": "Apex Food Company", "dedupe_key": "Located in Apex, NC"},
+{"id": "apex_food_company_001", "name": "Apex Food Company", "aliases": ["Apex Foods", "Apex Food Co."], "dedupe_key": "Located in Apex, NC"},
+{"id": "green_valley_farm_001", "name": "Green Valley Farm", "aliases": ["Green Valley Farms", "Green Valley Farm LLC"], "dedupe_key": "www.greenvalleyfarm.com"},
 ```
 
 ## Market Index File
@@ -75,7 +78,7 @@ The format of this file is described below.
 - State: <state>
 - ZIP: <zip_code>
 - Latitude: <lat>
-_ Longitude: <long>
+- Longitude: <long>
   
 ## Schedule
 - Day: <day>
@@ -113,7 +116,7 @@ What does each vendor sell at the market ?
 ```
 The agent would
 - Mark the vendor as status 'inactive' in vendors.md if it does not find it in source. 
-The structure of this markets `vendors.md` is described below. Note that the products are free-text and the agent would normalize them as required.
+The structure of this markets `vendors.md` is described below. Products are free-text; do not normalize them.
 
 ```
 # Vendors
@@ -134,8 +137,13 @@ Products sold at this market
 ### Last Modified
 < time it was modified>
 
-### Source
-< description of the last ingestion > 
+### Sources
+
+#### Source 1
+< description of the last ingestion >
+
+#### Source 2
+< description of the last-1 ingestion >
 
 ## <vendor_id2>
 .....
@@ -153,7 +161,7 @@ Say there is  a market "Durham Farmer's Market" with a vendor "Green Valley Farm
 
 - The vendor registry would assign a unique id to vendor.
 ```
-{"id":"green_valley_farm_001","name":"Green Valley Farm","dedupe_key":"www.greenvalleyfarm.com"},
+{"id":"green_valley_farm_001","name":"Green Valley Farm","aliases":["Green Valley Farms","Green Valley Farm LLC"],"dedupe_key":"www.greenvalleyfarm.com"},
 ```
 
 - The file `markets/durham_farmers_market_001/index.md`
@@ -161,7 +169,13 @@ Say there is  a market "Durham Farmer's Market" with a vendor "Green Valley Farm
 # Durham Farmers Market
 
 ## Location
-Durham, NC
+
+- Address: 501 Foster St
+- City: Durham
+- State: NC
+- ZIP: 27701
+- Latitude: 35.9940
+- Longitude: -78.8986
 
 ## Schedule
 Saturday
@@ -204,7 +218,10 @@ Status: active
 ### Last Modified
 2026-05-01T00:00:00Z
 
-### Source
-- Vendor directory page
+### Sources
+
+#### Source 1
+- Timestamp: 2026-05-01T00:00:00Z
+- Type: Vendor directory page
 - Last seen: 2026-05-01
 ```
