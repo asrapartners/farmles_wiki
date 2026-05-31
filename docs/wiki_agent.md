@@ -13,6 +13,25 @@ Vendor sells Products within a specific Market
 
 The wiki is the authoritative source of information in human readable format. Queries to it are market-centric.   
 
+## Agent Contract
+
+### Trigger
+Run this agent when new source evidence is available for one or more farmers market and the wiki needs to be created or modfied.
+
+### Input 
+The agent receives one of the following
+- `source root`: Folder containing source evidence files from a scraper or harvester.
+- csv file: File lists all the available markets with their meta information.
+- `wiki_root` existing wiki folder to read and update.
+### Output
+The agent updates the files under `wiki_root`:
+- `market_registry.jsonl` for looking up and adding new market.
+- `vendor_registry.jsonl` for looking up and adding new vendors.
+### Write Behaviour
+- Match existing markets before creating new market_id in `market_registry.jsonl`
+- Match existing vendors before creating new vendor_id in `vendor_registry.jsonl`
+- Append source evidence to `sources`
+- Do not delete existing source history
 ## Entities
 
 ### Market
@@ -108,3 +127,75 @@ Good examples:
 
 ## Schema
 Refer to [[knowledge_map_schema]] for more details.
+
+## Steps To Follow
+
+1. Read the source evidence and identify all farmers markets described in the source.
+
+2. For each market to be considered it must have a name and a `city` or `zip` where it is located. If name + one of address attribute  is missing then the market must be skipped.
+   - Search `market_registry.jsonl` for a matching market using:
+	1. Compare the source market name against:
+	   - `name`
+
+	2. A market is considered a match only if the name matches and at least one location field also matches:
+		   - `city`
+		   - `zip`
+
+	3.  If the name matches but neither `city` nor `zip` matches, do not treat it as the same market.
+	   
+3. If no confident match is found, create a new market entry.
+     - `name`
+     - `id`
+     - `city`, `zip`
+   - If a matching market is found, use the existing `market_id`.
+   - If no matching market is found, create a new entry in `market_registry.jsonl` and assign a new `market_id`.
+     
+4. Use the `market_id` to locate the market folder:
+
+   ```
+   wiki/markets/<market_id>
+   ```
+
+   Create the folder if it does not already exist.
+
+5. Extract all market information available from the source evidence and create or update:
+
+   ```
+   wiki/markets/<market_id>/index.md
+   ```
+
+   using the schema defined in `knowledge_map_schema`.
+
+6. Extract all vendors associated with the market.
+
+7. For each vendor:
+   - Search `vendor_registry.jsonl` for a matching vendor using:
+     - `name`
+     - `aliases`
+     - `dedupe_key`
+   - If a matching vendor is found, use the existing `vendor_id`.
+   - If no matching vendor is found, create a new entry in `vendor_registry.jsonl` and assign a new `vendor_id`.
+
+7. For each vendor, extract:
+   - Vendor name
+   - Vendor status (if known)
+   - Products sold at this market
+   - Supporting source evidence
+
+8. Create or update:
+
+   ```
+   wiki/markets/<market_id>/vendors.md
+   ```
+
+   using the schema defined in `knowledge_map_schema`.
+
+9. Record all source evidence used to support the extracted information in the appropriate `Sources` section.
+
+10. Write all updates back to the wiki. The only files that may be modified are:
+
+    - `market_registry.jsonl`
+    - `vendor_registry.jsonl`
+    - `wiki/markets/<market_id>/index.md`
+    - `wiki/markets/<market_id>/vendors.md`
+

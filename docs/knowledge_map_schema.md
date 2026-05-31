@@ -28,10 +28,15 @@ The flow for an agent is to search `name` first, then `aliases`, and use `dedupe
 
 ### market_registry.jsonl
 Assigns the unique id to a farmer's market. 
+A market match requires:
+name match
+AND
+(city match OR zip match)
+
 ```
-{"id": "apex_farmers_market", "name": "Apex Farmers Market", "dedupe_key": ""},
-{"id": "market_nc", "name": "Farmers Market", "dedupe_key": "Location is in NC"},
-{"id": "market_ga", "name": "Farmers Market", "dedupe_key": "Location is in GA"},
+{"id": "apex_farmers_market", "name": "Apex Farmers Market", "city": "apex"},
+{"id": "market_nc", "name": "Farmers Market", "zip": "27502"},
+{"id": "market_ga", "name": "Farmers Market", "city": "Atlanta"},
 
 ```
 
