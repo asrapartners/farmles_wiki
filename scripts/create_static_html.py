@@ -30,7 +30,7 @@ Incremental rebuild:
   Triggered only when --changed lists market Markdown files exclusively
   and the required output files already exist.
 
-  Steps: convert only the changed .md files to their matching .html paths.
+  Steps: regenerate all HTML files for each affected market directory.
   Registry and landing page are left untouched.
 
 EXIT CODES
@@ -108,7 +108,7 @@ def write_market_registry_json(markets: list[dict], out_path: Path) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Markdown conversion
+# Markdown helpers
 # ---------------------------------------------------------------------------
 
 def extract_title(source: str, fallback: str) -> str:
@@ -119,39 +119,235 @@ def extract_title(source: str, fallback: str) -> str:
     return fallback
 
 
-def md_to_html(source: str, title: str) -> str:
+def render_markdown(source: str) -> str:
     try:
         import markdown as md_lib
     except ImportError:
         sys.exit("[error] The 'markdown' package is not installed. Run: pip install markdown")
-    body = md_lib.markdown(source, extensions=["tables", "fenced_code"])
+    return md_lib.markdown(source, extensions=["tables", "fenced_code"])
+
+
+# ---------------------------------------------------------------------------
+# Vendor parsing
+# ---------------------------------------------------------------------------
+
+def parse_vendors(source: str) -> list[dict]:
+    """Parse vendors.md into a list of vendor dicts.
+
+    Each vendor block starts with a '## vendor_id' heading and contains
+    inline 'Name:' / 'Status:' fields and a '### Products' subsection.
+    """
+    vendors: list[dict] = []
+    current: dict | None = None
+    section: str | None = None
+
+    for line in source.splitlines():
+        if line.startswith("## "):
+            if current:
+                vendors.append(current)
+            current = {"id": line[3:].strip(), "name": "", "status": "active", "products": []}
+            section = None
+        elif current is None:
+            continue
+        elif line.startswith("### "):
+            section = line[4:].strip().lower()
+        elif section is None:
+            if line.startswith("Name:"):
+                current["name"] = line[5:].strip()
+            elif line.startswith("Status:"):
+                current["status"] = line[7:].strip()
+        elif section == "products" and line.startswith("- "):
+            current["products"].append(line[2:].strip())
+        # Sources and other subsections are intentionally skipped
+
+    if current:
+        vendors.append(current)
+
+    return [v for v in vendors if v["name"]]  # drop malformed entries
+
+
+# ---------------------------------------------------------------------------
+# Market index page (index.md -> index.html)
+# ---------------------------------------------------------------------------
+
+def generate_market_index_html(source: str, vendor_count: int) -> str:
+    title = extract_title(source, "Market")
+    body = render_markdown(source)
+    vendors_label = f"Vendors ({vendor_count})" if vendor_count else "Vendors"
     return (
         "<!doctype html>\n"
         "<html>\n"
         "<head>\n"
-        f'  <meta charset="utf-8">\n'
+        '  <meta charset="utf-8">\n'
         f"  <title>{title}</title>\n"
+        "  <style>\n"
+        "    body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }\n"
+        "    nav { margin-bottom: 1.5rem; font-size: 0.9rem; }\n"
+        "    nav a { color: #1a73e8; text-decoration: none; }\n"
+        "    nav a:hover { text-decoration: underline; }\n"
+        "    nav .sep { color: #999; margin: 0 0.4rem; }\n"
+        "  </style>\n"
         "</head>\n"
         "<body>\n"
-        '  <p><a href="../../index.html">← Back to Markets</a></p>\n'
+        "  <nav>\n"
+        '    <a href="../../index.html">&#8592; Markets</a>\n'
+        '    <span class="sep">|</span>\n'
+        f'    <a href="vendors.html">{vendors_label}</a>\n'
+        "  </nav>\n"
         f"  {body}\n"
         "</body>\n"
         "</html>\n"
     )
 
 
-def convert_md_file(md_path: Path, html_path: Path) -> None:
+# ---------------------------------------------------------------------------
+# Vendor page (vendors.md -> vendors.html)
+# ---------------------------------------------------------------------------
+
+VENDORS_HTML_TEMPLATE = """\
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Vendors — {market_name}</title>
+  <style>
+    body { font-family: sans-serif; max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+    nav { margin-bottom: 1.5rem; font-size: 0.9rem; }
+    nav a { color: #1a73e8; text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+    nav .sep { color: #999; margin: 0 0.4rem; }
+    h1 { margin-bottom: 0.25rem; }
+    #search { width: 100%; padding: 0.5rem; font-size: 1rem; margin: 1rem 0; box-sizing: border-box; }
+    #count { color: #555; font-size: 0.9rem; margin-bottom: 1rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+    .card { border: 1px solid #ddd; border-radius: 6px; padding: 1rem; }
+    .card h2 { margin: 0 0 0.4rem; font-size: 1rem; }
+    .badge { display: inline-block; font-size: 0.75rem; padding: 0.1rem 0.4rem;
+             border-radius: 3px; margin-bottom: 0.5rem; }
+    .badge.active { background: #e6f4ea; color: #1e7e34; }
+    .badge.inactive { background: #fce8e6; color: #c5221f; }
+    .products { margin: 0; padding-left: 1.2rem; font-size: 0.9rem; color: #333; }
+    .products li { margin-bottom: 0.15rem; }
+    #no-match { display: none; color: #888; font-style: italic; margin-top: 1rem; }
+    #empty-msg { color: #888; font-style: italic; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="../../index.html">&#8592; Markets</a>
+    <span class="sep">|</span>
+    <a href="index.html">{market_name}</a>
+  </nav>
+  <h1>Vendors — {market_name}</h1>
+{body_content}
+  <script>
+const VENDORS = {vendors_json};
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function renderCards(list) {
+  if (!list.length) {
+    document.getElementById('no-match').style.display = 'block';
+    document.getElementById('grid').innerHTML = '';
+    document.getElementById('count').textContent = '0 vendors';
+    return;
+  }
+  document.getElementById('no-match').style.display = 'none';
+  document.getElementById('count').textContent = list.length + ' vendor' + (list.length !== 1 ? 's' : '');
+  document.getElementById('grid').innerHTML = list.map(v => {
+    const badgeClass = v.status === 'active' ? 'active' : 'inactive';
+    const products = v.products.length
+      ? '<ul class="products">' + v.products.map(p => '<li>' + escHtml(p) + '</li>').join('') + '</ul>'
+      : '';
+    return '<div class="card">'
+      + '<h2>' + escHtml(v.name) + '</h2>'
+      + '<span class="badge ' + badgeClass + '">' + escHtml(v.status) + '</span>'
+      + products
+      + '</div>';
+  }).join('');
+}
+
+document.getElementById('search').addEventListener('input', function() {
+  const q = this.value.toLowerCase().trim();
+  const filtered = q
+    ? VENDORS.filter(v =>
+        v.name.toLowerCase().includes(q) ||
+        v.products.some(p => p.toLowerCase().includes(q))
+      )
+    : VENDORS;
+  renderCards(filtered);
+});
+
+renderCards(VENDORS);
+  </script>
+</body>
+</html>
+"""
+
+
+def generate_vendors_html(vendors: list[dict], market_name: str) -> str:
+    if not vendors:
+        body_content = '  <p id="empty-msg">No vendors on record for this market.</p>\n'
+        return (
+            VENDORS_HTML_TEMPLATE
+            .replace("{market_name}", market_name)
+            .replace("{body_content}", body_content)
+            .replace("{vendors_json}", "[]")
+        )
+
+    body_content = (
+        '  <input id="search" type="search" placeholder="Search by name or product&hellip;" aria-label="Search vendors">\n'
+        '  <p id="count"></p>\n'
+        '  <p id="no-match">No vendors match your search.</p>\n'
+        '  <div id="grid" class="grid"></div>\n'
+    )
+    vendors_json = json.dumps(vendors, ensure_ascii=False)
+    return (
+        VENDORS_HTML_TEMPLATE
+        .replace("{market_name}", market_name)
+        .replace("{body_content}", body_content)
+        .replace("{vendors_json}", vendors_json)
+    )
+
+
+# ---------------------------------------------------------------------------
+# Per-market directory conversion
+# ---------------------------------------------------------------------------
+
+def convert_market_dir(market_dir: Path, out_market_dir: Path) -> None:
+    out_market_dir.mkdir(parents=True, exist_ok=True)
+
+    vendors_md_path = market_dir / "vendors.md"
+    vendors: list[dict] = []
+    if vendors_md_path.exists():
+        try:
+            vendors_source = vendors_md_path.read_text(encoding="utf-8")
+        except OSError as exc:
+            sys.exit(f"[error] Cannot read {vendors_md_path}: {exc}")
+        vendors = parse_vendors(vendors_source)
+
+    index_md_path = market_dir / "index.md"
+    if index_md_path.exists():
+        try:
+            index_source = index_md_path.read_text(encoding="utf-8")
+        except OSError as exc:
+            sys.exit(f"[error] Cannot read {index_md_path}: {exc}")
+        market_name = extract_title(index_source, market_dir.name)
+        html = generate_market_index_html(index_source, len(vendors))
+        try:
+            (out_market_dir / "index.html").write_text(html, encoding="utf-8")
+        except OSError as exc:
+            sys.exit(f"[error][exit:2] Cannot write {out_market_dir / 'index.html'}: {exc}")
+    else:
+        market_name = market_dir.name
+
+    vendors_html = generate_vendors_html(vendors, market_name)
     try:
-        source = md_path.read_text(encoding="utf-8")
+        (out_market_dir / "vendors.html").write_text(vendors_html, encoding="utf-8")
     except OSError as exc:
-        sys.exit(f"[error] Cannot read {md_path}: {exc}")
-    title = extract_title(source, md_path.stem)
-    html = md_to_html(source, title)
-    try:
-        html_path.parent.mkdir(parents=True, exist_ok=True)
-        html_path.write_text(html, encoding="utf-8")
-    except OSError as exc:
-        sys.exit(f"[error][exit:2] Cannot write {html_path}: {exc}")
+        sys.exit(f"[error][exit:2] Cannot write {out_market_dir / 'vendors.html'}: {exc}")
 
 
 # ---------------------------------------------------------------------------
@@ -282,11 +478,7 @@ def convert_all_markets(input_dir: Path, out_dir: Path) -> None:
     for market_dir in sorted(markets_dir.iterdir()):
         if not market_dir.is_dir():
             continue
-        out_market_dir = out_dir / "markets" / market_dir.name
-        for md_name, html_name in [("index.md", "index.html"), ("vendors.md", "vendors.html")]:
-            md_path = market_dir / md_name
-            if md_path.exists():
-                convert_md_file(md_path, out_market_dir / html_name)
+        convert_market_dir(market_dir, out_dir / "markets" / market_dir.name)
 
 
 def full_rebuild(input_dir: Path, out_dir: Path) -> None:
@@ -305,21 +497,21 @@ def full_rebuild(input_dir: Path, out_dir: Path) -> None:
 
 def incremental_rebuild(input_dir: Path, out_dir: Path, changed_paths: list[Path]) -> None:
     markets_prefix = (input_dir / "markets").resolve()
-    md_files = [
-        p for p in changed_paths
-        if p.suffix == ".md" and markets_prefix in p.parents
-    ]
-    if not md_files:
+    # Collect unique market dirs that have changed files
+    affected: set[Path] = set()
+    for p in changed_paths:
+        if p.suffix == ".md" and markets_prefix in p.parents:
+            affected.add(p.parent)
+
+    if not affected:
         print("[info] No market Markdown files in --changed; nothing to do.")
         return
 
-    print(f"[info] Incremental rebuild: {len(md_files)} file(s)")
-    for md_path in md_files:
-        # Derive output path: input/markets/<id>/foo.md -> out/markets/<id>/foo.html
-        rel = md_path.relative_to(input_dir)
-        html_path = out_dir / rel.with_suffix(".html")
-        convert_md_file(md_path, html_path)
-        print(f"[info]   {md_path} -> {html_path}")
+    print(f"[info] Incremental rebuild: {len(affected)} market dir(s)")
+    for market_dir in sorted(affected):
+        out_market_dir = out_dir / "markets" / market_dir.name
+        convert_market_dir(market_dir, out_market_dir)
+        print(f"[info]   {market_dir.name}")
 
 
 def needs_full_rebuild(
@@ -372,7 +564,7 @@ def build_parser() -> argparse.ArgumentParser:
         default=None,
         help=(
             "Optional list of changed file paths. When provided and all changed "
-            "files are market Markdown files, only those files are regenerated "
+            "files are market Markdown files, only those markets are regenerated "
             "(incremental rebuild). Including a registry file forces a full rebuild."
         ),
     )
