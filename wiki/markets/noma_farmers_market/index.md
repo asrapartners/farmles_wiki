@@ -15,7 +15,7 @@ NoMa BID's evening market takes over Third Street NE with 30+ vendors, live musi
 ## Schedule
 - Day: Thursday
 - Hours: 4:00 PM – 8:00 PM
-- Season: May 4 – October 19
+- Season: April 30 – October 29 (2026)
 - Type: outdoor
 
 ## URL
@@ -36,8 +36,17 @@ NoMa BID's evening market takes over Third Street NE with 30+ vendors, live musi
 2026-05-30T00:00:00Z
 
 ## Sources
+
+### Source 1
 - Timestamp: 2026-05-30T00:00:00Z
 - Type: CSV import
 - File: sap1.csv
 - Agent: wiki_agent
 - Notes: Initial wiki creation from CSV source data.
+
+### Source 2
+- Timestamp: 2026-05-30T00:00:00Z
+- Type: Website scrape
+- Source slug: nomabid-org-farmersmarket
+- Agent: wiki_agent
+- Notes: Ingested 2026 vendor list (31 vendors) from farmersmarket page. Updated season dates to April 30 – October 29, 2026. Market is managed by Diverse Markets Management.

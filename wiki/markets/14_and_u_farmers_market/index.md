@@ -37,8 +37,17 @@ Hyper-local producer-only market beside the Reeves Center where U Street neighbo
 2026-05-30T00:00:00Z
 
 ## Sources
+
+### Source 1
 - Timestamp: 2026-05-30T00:00:00Z
 - Type: CSV import
 - File: sap1.csv
 - Agent: wiki_agent
 - Notes: Initial wiki creation from CSV source data. Market is_active=FALSE per source.
+
+### Source 2
+- Timestamp: 2026-05-30T00:00:00Z
+- Type: Website scrape
+- Source slug: marketsandmore-info
+- Agent: wiki_agent
+- Notes: Website confirms market details (Saturdays 9am-1pm, May-November, Reeves Center 14th & U NW). Producer-only, Chesapeake Watershed vendors. No specific vendor list extracted; source does not enumerate individual vendors for this market. New related market Bloomingdale Farmers Market created from same source.

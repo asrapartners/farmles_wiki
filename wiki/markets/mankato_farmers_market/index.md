@@ -35,8 +35,17 @@ The premier hub for the Minnesota River Valley operates year-round with winter s
 2026-05-30T00:00:00Z
 
 ## Sources
+
+### Source 1
 - Timestamp: 2026-05-30T00:00:00Z
 - Type: CSV import
 - File: sap1.csv
 - Agent: wiki_agent
 - Notes: Initial wiki creation from CSV source data.
+
+### Source 2
+- Timestamp: 2026-05-30T00:00:00Z
+- Type: Website scrape
+- Source slug: mankatofarmersmarket-com
+- Agent: wiki_agent
+- Notes: Source pages yielded no substantive content beyond page titles and URLs. Vendor listing page and about page returned no extractable content. Notes: Vendor information not found.

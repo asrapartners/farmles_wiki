@@ -36,8 +36,17 @@ A harbor-side market at Broadway Square; winter hours (Dec–Apr) shift to 8:00 
 2026-05-30T00:00:00Z
 
 ## Sources
+
+### Source 1
 - Timestamp: 2026-05-30T00:00:00Z
 - Type: CSV import
 - File: sap1.csv
 - Agent: wiki_agent
 - Notes: Initial wiki creation from CSV source data.
+
+### Source 2
+- Timestamp: 2026-05-30T00:00:00Z
+- Type: Website scrape
+- Source slug: magnetmarkets-com-fells-point-farmers-market-html
+- Agent: wiki_agent
+- Notes: Source pages yielded no substantive content beyond page titles and URLs. Source is magnetmarkets.com which appears to be a market management site. Fells Point vendor and market detail pages returned no extractable content. Notes: Vendor information not found.

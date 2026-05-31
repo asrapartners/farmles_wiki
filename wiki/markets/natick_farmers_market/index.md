@@ -38,8 +38,17 @@ Moves indoors to the Common Street Spiritual Center during colder months, mainta
 2026-05-30T00:00:00Z
 
 ## Sources
+
+### Source 1
 - Timestamp: 2026-05-30T00:00:00Z
 - Type: CSV import
 - File: sap1.csv
 - Agent: wiki_agent
 - Notes: Initial wiki creation from CSV source data.
+
+### Source 2
+- Timestamp: 2026-05-30T00:00:00Z
+- Type: Website scrape
+- Source slug: natickfarmersmarket-org
+- Agent: wiki_agent
+- Notes: Source page yielded no content (empty body, source URL only). Notes: Vendor information not found.

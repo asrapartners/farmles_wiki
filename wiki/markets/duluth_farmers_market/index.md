@@ -35,8 +35,17 @@ A historic North Shore staple in a dedicated 1911 pavilion offering cool-climate
 2026-05-30T00:00:00Z
 
 ## Sources
+
+### Source 1
 - Timestamp: 2026-05-30T00:00:00Z
 - Type: CSV import
 - File: sap1.csv
 - Agent: wiki_agent
 - Notes: Initial wiki creation from CSV source data.
+
+### Source 2
+- Timestamp: 2026-05-30T00:00:00Z
+- Type: Website scrape
+- Source slug: duluthfarmersmarket-com
+- Agent: wiki_agent
+- Notes: Source pages yielded no substantive content beyond page titles and URLs. Market homepage confirmed site title "Duluth Farmers Market – Open Since 1911". No vendor or schedule details extracted. Notes: Vendor information not found.
