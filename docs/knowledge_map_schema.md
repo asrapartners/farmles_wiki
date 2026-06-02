@@ -31,12 +31,21 @@ Assigns the unique id to a farmer's market.
 A market match requires:
 name match
 AND
+state match
+AND
 (city match OR zip match)
 
+Fields:
+- `id`: Unique market identifier (snake_case)
+- `name`: Market name
+- `state`: US state abbreviation (e.g. "NC", "CA") — required for matching
+- `city`: City name
+- `zip`: ZIP code
+
 ```
-{"id": "apex_farmers_market", "name": "Apex Farmers Market", "city": "apex"},
-{"id": "market_nc", "name": "Farmers Market", "zip": "27502"},
-{"id": "market_ga", "name": "Farmers Market", "city": "Atlanta"},
+{"id": "apex_farmers_market", "name": "Apex Farmers Market", "city": "Apex", "state": "NC"},
+{"id": "market_nc", "name": "Farmers Market", "zip": "27502", "state": "NC"},
+{"id": "market_ga", "name": "Farmers Market", "city": "Atlanta", "state": "GA"},
 
 ```
 

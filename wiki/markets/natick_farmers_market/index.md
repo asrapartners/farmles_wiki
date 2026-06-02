@@ -4,7 +4,6 @@
 Moves indoors to the Common Street Spiritual Center during colder months, maintaining weekly access.
 
 ## Location
-
 - Address: 13 Common St
 - City: Natick
 - State: MA
@@ -19,9 +18,10 @@ Moves indoors to the Common Street Spiritual Center during colder months, mainta
 - Type: outdoor
 
 ## URL
-<a href="https://www.natickfarmersmarket.org/">https://www.natickfarmersmarket.org/</a>
+https://www.natickfarmersmarket.org/
 
 ## Logo
+
 
 ## Tags
 - town-common
@@ -32,23 +32,12 @@ Moves indoors to the Common Street Spiritual Center during colder months, mainta
 - weekly
 
 ## First Created
-2026-02-18T01:49:18Z
+2026-02-18 01:49:18.140848+00
 
 ## Last Modified
-2026-05-30T00:00:00Z
+2026-05-12 01:21:27.338999+00
 
 ## Sources
-
-### Source 1
-- Timestamp: 2026-05-30T00:00:00Z
-- Type: CSV import
-- File: sap1.csv
-- Agent: wiki_agent
-- Notes: Initial wiki creation from CSV source data.
-
-### Source 2
-- Timestamp: 2026-05-30T00:00:00Z
-- Type: Website scrape
-- Source slug: natickfarmersmarket-org
-- Agent: wiki_agent
-- Notes: Source page yielded no content (empty body, source URL only). Notes: Vendor information not found.
+- Type: backend.csv
+- Source: official website
+- Ingested: 2026-06-02

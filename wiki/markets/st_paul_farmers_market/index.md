@@ -4,7 +4,6 @@
 100% grower-only flagship; summer season runs late April–Nov.
 
 ## Location
-
 - Address: 290 5th St E
 - City: St. Paul
 - State: MN
@@ -19,9 +18,10 @@
 - Type: mixed
 
 ## URL
-<a href="https://stpaulfarmersmarket.com/">https://stpaulfarmersmarket.com/</a>
+https://stpaulfarmersmarket.com/
 
 ## Logo
+
 
 ## Tags
 - flagship
@@ -31,23 +31,12 @@
 - sunday
 
 ## First Created
-2026-02-18T01:49:18Z
+2026-02-18 01:49:18.140848+00
 
 ## Last Modified
-2026-05-30T00:00:00Z
+2026-05-12 01:21:27.396018+00
 
 ## Sources
-
-### Source 1
-- Timestamp: 2026-05-30T00:00:00Z
-- Type: CSV import
-- File: sap1.csv
-- Agent: wiki_agent
-- Notes: Initial wiki creation from CSV source data.
-
-### Source 2
-- Timestamp: 2026-05-30T00:00:00Z
-- Type: Website scrape
-- Source slug: stpaulfarmersmarket-com
-- Agent: wiki_agent
-- Notes: Source pages yielded no substantive content beyond page titles and URLs. About, contact, vendor-stores, and food assistance pages all returned no extractable content. Notes: Vendor information not found.
+- Type: backend.csv
+- Source: official website
+- Ingested: 2026-06-02

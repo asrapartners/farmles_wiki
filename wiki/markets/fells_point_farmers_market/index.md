@@ -1,10 +1,9 @@
 # Fells Point Farmers Market
 
 ## Summary
-A harbor-side market at Broadway Square; winter hours (Dec–Apr) shift to 8:00 AM.
+A harbor-side market at Broadway Square; winter hours (Dec–Apr) shift to 8:00 AM. hi ty
 
 ## Location
-
 - Address: 800 S Broadway
 - City: Baltimore
 - State: MD
@@ -14,15 +13,15 @@ A harbor-side market at Broadway Square; winter hours (Dec–Apr) shift to 8:00 
 
 ## Schedule
 - Day: Saturday
-- Hours: 8:00 AM – 12:30 PM
-- Season: Year-round
-- Type: outdoor
+- Hours: 8 AM – 12:30 PM
+- Season: 
+- Type: Outdoor
 
 ## URL
-<a href="https://fellspointfarmersmarket.com/">https://fellspointfarmersmarket.com/</a>
+https://fellspointfarmersmarket.com/
 
 ## Logo
-<img src="https://svwbitfrizbkozviutdv.supabase.co/storage/v1/object/public/market-images/ed4447c5-8897-4962-b8fd-36bd88db2c26/1777817006766.png?t=1777817007512" alt="Fells Point Farmers Market logo">
+https://svwbitfrizbkozviutdv.supabase.co/storage/v1/object/public/market-images/ed4447c5-8897-4962-b8fd-36bd88db2c26/1777817006766.png?t=1777817007512
 
 ## Tags
 - harbor-views
@@ -30,23 +29,12 @@ A harbor-side market at Broadway Square; winter hours (Dec–Apr) shift to 8:00 
 - year-round
 
 ## First Created
-2026-03-18T00:29:50Z
+2026-03-18 00:29:50.141831+00
 
 ## Last Modified
-2026-05-30T00:00:00Z
+2026-05-05 21:28:13.295863+00
 
 ## Sources
-
-### Source 1
-- Timestamp: 2026-05-30T00:00:00Z
-- Type: CSV import
-- File: sap1.csv
-- Agent: wiki_agent
-- Notes: Initial wiki creation from CSV source data.
-
-### Source 2
-- Timestamp: 2026-05-30T00:00:00Z
-- Type: Website scrape
-- Source slug: magnetmarkets-com-fells-point-farmers-market-html
-- Agent: wiki_agent
-- Notes: Source pages yielded no substantive content beyond page titles and URLs. Source is magnetmarkets.com which appears to be a market management site. Fells Point vendor and market detail pages returned no extractable content. Notes: Vendor information not found.
+- Type: backend.csv
+- Source: official website
+- Ingested: 2026-06-02

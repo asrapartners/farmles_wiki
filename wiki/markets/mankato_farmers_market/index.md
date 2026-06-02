@@ -4,7 +4,6 @@
 The premier hub for the Minnesota River Valley operates year-round with winter sessions inside Bomgaars.
 
 ## Location
-
 - Address: 1895 Adams St
 - City: Mankato
 - State: MN
@@ -19,9 +18,10 @@ The premier hub for the Minnesota River Valley operates year-round with winter s
 - Type: mixed
 
 ## URL
-<a href="https://mankatofarmersmarket.com/">https://mankatofarmersmarket.com/</a>
+https://mankatofarmersmarket.com/
 
 ## Logo
+
 
 ## Tags
 - river-valley
@@ -29,23 +29,12 @@ The premier hub for the Minnesota River Valley operates year-round with winter s
 - university-town
 
 ## First Created
-2026-02-18T01:49:18Z
+2026-02-18 01:49:18.140848+00
 
 ## Last Modified
-2026-05-30T00:00:00Z
+2026-05-05 21:28:13.295863+00
 
 ## Sources
-
-### Source 1
-- Timestamp: 2026-05-30T00:00:00Z
-- Type: CSV import
-- File: sap1.csv
-- Agent: wiki_agent
-- Notes: Initial wiki creation from CSV source data.
-
-### Source 2
-- Timestamp: 2026-05-30T00:00:00Z
-- Type: Website scrape
-- Source slug: mankatofarmersmarket-com
-- Agent: wiki_agent
-- Notes: Source pages yielded no substantive content beyond page titles and URLs. Vendor listing page and about page returned no extractable content. Notes: Vendor information not found.
+- Type: backend.csv
+- Source: official website
+- Ingested: 2026-06-02

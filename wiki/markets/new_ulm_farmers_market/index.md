@@ -4,7 +4,6 @@
 A high-energy market in the German heritage capital featuring specialized Farm-to-Fun Days and fresh local produce.
 
 ## Location
-
 - Address: 2015 S Broadway St
 - City: New Ulm
 - State: MN
@@ -19,9 +18,10 @@ A high-energy market in the German heritage capital featuring specialized Farm-t
 - Type: outdoor
 
 ## URL
-<a href="https://www.newulm.com/things-to-do/attractions/farmersmarket/">https://www.newulm.com/things-to-do/attractions/farmersmarket/</a>
+https://www.newulm.com/things-to-do/attractions/farmersmarket/
 
 ## Logo
+
 
 ## Tags
 - german-heritage
@@ -29,14 +29,12 @@ A high-energy market in the German heritage capital featuring specialized Farm-t
 - family
 
 ## First Created
-2026-02-18T01:49:18Z
+2026-02-18 01:49:18.140848+00
 
 ## Last Modified
-2026-05-30T00:00:00Z
+2026-05-05 21:28:13.295863+00
 
 ## Sources
-- Timestamp: 2026-05-30T00:00:00Z
-- Type: CSV import
-- File: sap1.csv
-- Agent: wiki_agent
-- Notes: Initial wiki creation from CSV source data.
+- Type: backend.csv
+- Source: official website
+- Ingested: 2026-06-02

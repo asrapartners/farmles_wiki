@@ -8,7 +8,9 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import sys
+from collections import Counter
 from pathlib import Path
 
 EPILOG = """
@@ -71,6 +73,17 @@ Notes:
 
 REQUIRED_MARKET_FIELDS = ("id", "name", "city", "zip")
 PAGE_SIZE = 10
+
+
+def get_git_commit() -> str:
+    try:
+        r = subprocess.run(
+            ["git", "rev-parse", "--short", "HEAD"],
+            capture_output=True, text=True, check=True,
+        )
+        return r.stdout.strip()
+    except Exception:
+        return "unknown"
 
 
 # ---------------------------------------------------------------------------
@@ -170,9 +183,26 @@ def parse_vendors(source: str) -> list[dict]:
 # Market index page (index.md -> index.html)
 # ---------------------------------------------------------------------------
 
+def preprocess_market_markdown(source: str) -> str:
+    """Convert raw URL and logo values to markdown links/images before rendering."""
+    # ## URL\n<bare url>  →  ## URL\n[url](url)
+    source = re.sub(
+        r'(^## URL[ \t]*\n)(https?://\S+)',
+        lambda m: m.group(1) + f'[{m.group(2)}]({m.group(2)})',
+        source, flags=re.MULTILINE,
+    )
+    # ## Logo\n<bare url>  →  ## Logo\n![logo](url)
+    source = re.sub(
+        r'(^## Logo[ \t]*\n)(https?://\S+)',
+        lambda m: m.group(1) + f'![logo]({m.group(2)})',
+        source, flags=re.MULTILINE,
+    )
+    return source
+
+
 def generate_market_index_html(source: str, vendor_count: int) -> str:
     title = extract_title(source, "Market")
-    body = render_markdown(source)
+    body = render_markdown(preprocess_market_markdown(source))
     vendors_label = f"Vendors ({vendor_count})" if vendor_count else "Vendors"
     return (
         "<!doctype html>\n"
@@ -186,6 +216,7 @@ def generate_market_index_html(source: str, vendor_count: int) -> str:
         "    nav a { color: #1a73e8; text-decoration: none; }\n"
         "    nav a:hover { text-decoration: underline; }\n"
         "    nav .sep { color: #999; margin: 0 0.4rem; }\n"
+        "    img { max-width: 220px; max-height: 160px; display: block; margin: 0.5rem 0 1rem; border: 1px solid #ddd; }\n"
         "  </style>\n"
         "</head>\n"
         "<body>\n"
@@ -359,27 +390,94 @@ LANDING_PAGE_TEMPLATE = """\
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Farmless Markets</title>
+  <title>Farmer's Market Database</title>
   <style>
-    body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
-    h1 { margin-bottom: 0.5rem; }
-    #search { width: 100%; padding: 0.5rem; font-size: 1rem; margin: 1rem 0; box-sizing: border-box; }
-    #results { list-style: none; padding: 0; margin: 0; }
-    #results li { padding: 0.6rem 0; border-bottom: 1px solid #eee; }
-    #results li a { font-weight: bold; text-decoration: none; color: #1a73e8; }
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: monospace; max-width: 860px; margin: 0 auto; padding: 0 0 3rem; background: #fff; color: #000; }
+
+    /* Banner */
+    .banner { background: #000; color: #fff; padding: 1.4rem 1.5rem 1.2rem; display: flex; justify-content: space-between; align-items: flex-end; }
+    .banner h1 { margin: 0; font-size: 1.5rem; font-family: monospace; font-weight: 700; letter-spacing: 0.02em; }
+    .banner-right { text-align: right; }
+    .banner-sub { font-size: 0.8rem; color: #aaa; margin: 0.2rem 0 0; }
+    .commit-badge { font-size: 0.75rem; color: #888; display: block; margin-top: 0.15rem; }
+
+    /* Content area */
+    .content { padding: 1.2rem 1.5rem 0; }
+
+    /* Top states strip */
+    .top-states { display: flex; align-items: center; flex-wrap: wrap; gap: 0; margin-bottom: 1rem; border: 1px solid #000; }
+    .state-chip { background: #fff; border: none; border-right: 1px solid #000; padding: 0.3rem 0.8rem;
+                  font-size: 0.82rem; font-family: monospace; cursor: pointer;
+                  display: inline-flex; align-items: center; gap: 0.4rem; color: #000; font-weight: 700; }
+    .state-chip:hover, .state-chip.active { background: #000; color: #fff; }
+    .state-chip span { font-weight: 400; color: #555; }
+    .state-chip:hover span, .state-chip.active span { color: #aaa; }
+    #chip-all { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .more-link-wrap { margin-left: auto; border-left: 1px solid #000; }
+    .more-link { display: block; padding: 0.3rem 0.8rem; font-size: 0.82rem;
+                 font-family: monospace; color: #000; text-decoration: none; font-weight: 700; }
+    .more-link:hover { background: #000; color: #fff; }
+
+    /* Search */
+    #search { width: 100%; padding: 0.55rem 0.7rem; font-size: 0.95rem; font-family: monospace;
+              margin-bottom: 0; border: 1px solid #000; border-top: none; background: #fff;
+              display: block; }
+    #search:focus { outline: 2px solid #000; outline-offset: -2px; }
+
+    /* Results */
+    #results { list-style: none; padding: 0; margin: 0; border: 1px solid #000; border-top: none; }
+    #results li { padding: 0.55rem 0.7rem; border-top: 1px solid #ddd; font-size: 0.88rem; }
+    #results li:first-child { border-top: none; }
+    #results li a { font-weight: 700; text-decoration: none; color: #000; }
     #results li a:hover { text-decoration: underline; }
-    .meta { color: #555; font-size: 0.9rem; }
-    #pagination { margin-top: 1rem; display: flex; align-items: center; gap: 0.5rem; }
-    #pagination button { padding: 0.4rem 0.8rem; cursor: pointer; }
-    #pagination button:disabled { opacity: 0.4; cursor: default; }
-    #page-info { font-size: 0.9rem; color: #555; }
-    #status { color: #888; font-style: italic; }
+    .meta { color: #555; }
+
+    /* Pagination */
+    #pagination { margin-top: 0; border: 1px solid #000; border-top: none; display: flex; align-items: center; }
+    #pagination button { padding: 0.4rem 0.9rem; cursor: pointer; border: none; border-right: 1px solid #000;
+                          background: #fff; font-family: monospace; font-size: 0.85rem; }
+    #pagination button:hover:not(:disabled) { background: #000; color: #fff; }
+    #pagination button:disabled { color: #bbb; cursor: default; }
+    #page-info { font-size: 0.82rem; color: #555; padding: 0 0.7rem; }
+    #next-btn { border-right: none; border-left: 1px solid #000; margin-left: auto; }
+
+    /* Results toolbar */
+    .results-toolbar { display: flex; justify-content: space-between; align-items: center;
+                       padding: 0.3rem 0.7rem; border: 1px solid #000; border-top: none;
+                       font-size: 0.8rem; background: #f4f4f4; font-family: monospace; }
+    #result-count { color: #555; }
+    #page-size { font-family: monospace; font-size: 0.8rem; border: 1px solid #888;
+                 padding: 0.1rem 0.3rem; background: #fff; cursor: pointer; }
   </style>
 </head>
 <body>
-  <h1>Farmless Markets</h1>
-  <input id="search" type="search" placeholder="Search by name, city, or ZIP&hellip;" aria-label="Search markets">
-  <p id="status">Loading&hellip;</p>
+  <header class="banner">
+    <h1>Farmer's Market Database</h1>
+    <div class="banner-right">
+      <p class="banner-sub">{summary_text}</p>
+      <span class="commit-badge">commit: {git_commit}</span>
+    </div>
+  </header>
+
+  <div class="content">
+    <div class="top-states">
+      <button id="chip-all" class="state-chip active" onclick="clearState()">All States</button>
+      {top_states_html}
+    </div>
+    <input id="search" type="search" placeholder="Search name, city, state, ZIP&hellip;" aria-label="Search markets">
+  </div>
+  <div class="results-toolbar">
+    <span id="result-count"></span>
+    <label for="page-size">Show:
+      <select id="page-size" oninput="pageSize=parseInt(this.value);currentPage=0;render()">
+        <option value="10" selected>10</option>
+        <option value="25">25</option>
+        <option value="50">50</option>
+        <option value="0">All</option>
+      </select>
+    </label>
+  </div>
   <ul id="results"></ul>
   <div id="pagination" hidden>
     <button id="prev-btn" onclick="changePage(-1)">&#8592; Prev</button>
@@ -388,38 +486,61 @@ LANDING_PAGE_TEMPLATE = """\
   </div>
 
   <script>
-    const PAGE_SIZE = {page_size};
-    let allMarkets = [];
+    let pageSize = {page_size};
+    let allMarkets = {markets_json};
     let filtered = [];
     let currentPage = 0;
 
-    fetch('market_registry.json')
-      .then(r => { if (!r.ok) throw new Error(r.statusText); return r.json(); })
-      .then(data => {
-        allMarkets = data;
-        filtered = data;
-        document.getElementById('status').textContent = '';
-        render();
-      })
-      .catch(err => {
-        document.getElementById('status').textContent = 'Failed to load market data: ' + err.message;
-      });
+    const _stateParam = new URLSearchParams(window.location.search).get('state');
+    if (_stateParam) { selectState(_stateParam.toUpperCase()); } else { filtered = [...allMarkets].sort(byName); render(); }
 
-    document.getElementById('search').addEventListener('input', function() {
-      const q = this.value.toLowerCase().trim();
-      filtered = q
-        ? allMarkets.filter(m =>
-            m.name.toLowerCase().includes(q) ||
-            m.city.toLowerCase().includes(q) ||
-            String(m.zip).toLowerCase().includes(q)
-          )
-        : allMarkets;
+    function clearState() {
+      document.getElementById('search').value = '';
+      document.querySelectorAll('.state-chip').forEach(c => c.classList.remove('active'));
+      document.getElementById('chip-all').classList.add('active');
+      filtered = [...allMarkets].sort(byName);
       currentPage = 0;
       render();
+    }
+
+    function selectState(state) {
+      const input = document.getElementById('search');
+      const already = input.value === state;
+      if (already) { clearState(); return; }
+      input.value = state;
+      document.querySelectorAll('.state-chip').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll(`.state-chip[data-state="${state}"]`).forEach(c => c.classList.add('active'));
+      applySearch(state);
+    }
+
+    function applySearch(q) {
+      q = q.toLowerCase().trim();
+      if (!q) { filtered = [...allMarkets].sort(byName); currentPage = 0; render(); return; }
+      const isStateCode = /^[a-z]{2}$/.test(q);
+      if (isStateCode) {
+        filtered = allMarkets.filter(m => (m.state || '').toLowerCase() === q);
+      } else {
+        filtered = allMarkets.filter(m =>
+          m.name.toLowerCase().includes(q) ||
+          m.city.toLowerCase().includes(q) ||
+          String(m.zip).toLowerCase().includes(q)
+        );
+      }
+      filtered = filtered.slice().sort(byName);
+      currentPage = 0;
+      render();
+    }
+
+    function byName(a, b) { return a.name < b.name ? -1 : a.name > b.name ? 1 : 0; }
+
+    document.getElementById('search').addEventListener('input', function() {
+      document.querySelectorAll('.state-chip').forEach(c => c.classList.remove('active'));
+      document.getElementById('chip-all').classList.toggle('active', !this.value.trim());
+      applySearch(this.value);
     });
 
     function changePage(delta) {
-      const maxPage = Math.ceil(filtered.length / PAGE_SIZE) - 1;
+      const maxPage = pageSize ? Math.ceil(filtered.length / pageSize) - 1 : 0;
       currentPage = Math.max(0, Math.min(currentPage + delta, maxPage));
       render();
     }
@@ -427,30 +548,102 @@ LANDING_PAGE_TEMPLATE = """\
     function render() {
       const list = document.getElementById('results');
       const pag = document.getElementById('pagination');
-      const start = currentPage * PAGE_SIZE;
-      const slice = filtered.slice(start, start + PAGE_SIZE);
+      const showAll = pageSize === 0;
+      const start = showAll ? 0 : currentPage * pageSize;
+      const slice = showAll ? filtered : filtered.slice(start, start + pageSize);
 
-      list.innerHTML = slice.map(m =>
-        `<li>
-          <a href="markets/${m.id}/index.html">${escHtml(m.name)}</a>
-          <span class="meta"> &mdash; ${escHtml(m.city)}, ${escHtml(String(m.zip))}</span>
-        </li>`
-      ).join('');
+      list.innerHTML = slice.length
+        ? slice.map(m =>
+            `<li>
+              <a href="markets/${m.id}/index.html">${escHtml(m.name)}</a>
+              <span class="meta"> &mdash; ${escHtml(m.city)}, ${escHtml(m.state || '')}, ${escHtml(String(m.zip))}</span>
+            </li>`
+          ).join('')
+        : '<li>No markets found.</li>';
 
-      if (filtered.length === 0) {
-        list.innerHTML = '<li>No markets found.</li>';
-      }
-
-      const totalPages = Math.ceil(filtered.length / PAGE_SIZE) || 1;
-      pag.hidden = totalPages <= 1;
+      document.getElementById('result-count').textContent =
+        `${filtered.length} result${filtered.length !== 1 ? 's' : ''}`;
+      const totalPages = showAll ? 1 : (Math.ceil(filtered.length / pageSize) || 1);
+      pag.hidden = showAll || totalPages <= 1;
       document.getElementById('page-info').textContent =
-        `Page ${currentPage + 1} of ${totalPages} (${filtered.length} result${filtered.length !== 1 ? 's' : ''})`;
+        `Page ${currentPage + 1} of ${totalPages}`;
       document.getElementById('prev-btn').disabled = currentPage === 0;
       document.getElementById('next-btn').disabled = currentPage >= totalPages - 1;
     }
 
     function escHtml(s) {
-      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+  </script>
+</body>
+</html>
+"""
+
+STATES_PAGE_TEMPLATE = """\
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Farmer's Market By State</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: monospace; max-width: 560px; margin: 0 auto; padding: 0 0 3rem; background: #fff; color: #000; }
+    .banner { background: #000; color: #fff; padding: 1.2rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+    .banner h1 { margin: 0; font-size: 1.2rem; font-weight: 700; }
+    .banner a { color: #aaa; text-decoration: none; font-size: 0.82rem; }
+    .banner a:hover { color: #fff; }
+    table { border-collapse: collapse; width: 100%; }
+    th { text-align: left; padding: 0.5rem 1rem; border-bottom: 2px solid #000;
+         cursor: pointer; user-select: none; background: #f4f4f4; font-size: 0.85rem; font-family: monospace; }
+    th:hover { background: #e8e8e8; }
+    td { padding: 0.45rem 1rem; border-bottom: 1px solid #ddd; font-size: 0.88rem; }
+    tbody tr:hover { background: #f8f8f8; }
+    td a { color: #000; font-weight: 700; text-decoration: none; }
+    td a:hover { text-decoration: underline; }
+    .count { font-variant-numeric: tabular-nums; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <h1>Farmer's Market By State</h1>
+    <a href="index.html">&#8592; Back</a>
+  </div>
+  <table>
+    <thead><tr>
+      <th id="th-state" onclick="sortTable('state')">STATE</th>
+      <th id="th-count" onclick="sortTable('count')">TOTAL MARKETS ▼</th>
+    </tr></thead>
+    <tbody id="tbody"></tbody>
+  </table>
+  <script>
+    const STATES = {states_json};
+    let sortCol = 'count';
+    let sortDir = -1;
+
+    renderTable();
+
+    function sortTable(col) {
+      if (sortCol === col) { sortDir *= -1; } else { sortCol = col; sortDir = -1; }
+      renderTable();
+    }
+
+    function renderTable() {
+      const sorted = [...STATES].sort((a, b) => {
+        const av = sortCol === 'state' ? a.state : a.count;
+        const bv = sortCol === 'state' ? b.state : b.count;
+        return av < bv ? -sortDir : av > bv ? sortDir : 0;
+      });
+      document.getElementById('tbody').innerHTML = sorted.map(r =>
+        `<tr><td><a href="index.html?state=${escHtml(r.state)}">${escHtml(r.state)}</a></td><td class="count">${r.count.toLocaleString()}</td></tr>`
+      ).join('');
+      document.getElementById('th-state').textContent =
+        'STATE' + (sortCol === 'state' ? (sortDir === 1 ? ' ▲' : ' ▼') : '');
+      document.getElementById('th-count').textContent =
+        'TOTAL MARKETS' + (sortCol === 'count' ? (sortDir === 1 ? ' ▲' : ' ▼') : '');
+    }
+
+    function escHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
   </script>
 </body>
@@ -458,9 +651,38 @@ LANDING_PAGE_TEMPLATE = """\
 """
 
 
-def write_landing_page(out_dir: Path) -> None:
-    html = LANDING_PAGE_TEMPLATE.replace("{page_size}", str(PAGE_SIZE))
+def write_landing_page(out_dir: Path, markets: list[dict], git_commit: str) -> None:
+    state_counts = Counter(m.get("state", "") for m in markets if m.get("state"))
+    top5 = state_counts.most_common(5)
+    top_states_html = "".join(
+        f'<button class="state-chip" data-state="{s}" onclick="selectState(\'{s}\')">'
+        f'{s} <span>{c:,}</span></button>'
+        for s, c in top5
+    )
+    top_states_html += '<span class="more-link-wrap"><a class="more-link" href="states.html">More &#8594;</a></span>'
+    summary_text = f"{len(markets):,} markets &middot; {len(state_counts):,} states"
+    markets_json = json.dumps(markets, ensure_ascii=False)
+    html = (
+        LANDING_PAGE_TEMPLATE
+        .replace("{page_size}", str(PAGE_SIZE))
+        .replace("{markets_json}", markets_json)
+        .replace("{git_commit}", git_commit)
+        .replace("{summary_text}", summary_text)
+        .replace("{top_states_html}", top_states_html)
+    )
     dest = out_dir / "index.html"
+    try:
+        dest.write_text(html, encoding="utf-8")
+    except OSError as exc:
+        sys.exit(f"[error][exit:2] Cannot write {dest}: {exc}")
+
+
+def write_states_page(out_dir: Path, markets: list[dict]) -> None:
+    state_counts = Counter(m.get("state", "") for m in markets if m.get("state"))
+    states_data = [{"state": s, "count": c} for s, c in state_counts.items()]
+    states_json = json.dumps(states_data, ensure_ascii=False)
+    html = STATES_PAGE_TEMPLATE.replace("{states_json}", states_json)
+    dest = out_dir / "states.html"
     try:
         dest.write_text(html, encoding="utf-8")
     except OSError as exc:
@@ -481,16 +703,30 @@ def convert_all_markets(input_dir: Path, out_dir: Path) -> None:
         convert_market_dir(market_dir, out_dir / "markets" / market_dir.name)
 
 
+def ui_rebuild(input_dir: Path, out_dir: Path) -> None:
+    if not out_dir.exists():
+        sys.exit(f"[error] Output directory does not exist: {out_dir} — run a full build first")
+    print(f"[info] UI rebuild: regenerating index.html and states.html")
+    git_commit = get_git_commit()
+    registry_path = input_dir / "market_registry.jsonl"
+    markets = load_market_registry(registry_path)
+    write_landing_page(out_dir, markets, git_commit)
+    write_states_page(out_dir, markets)
+    print("[info] Done.")
+
+
 def full_rebuild(input_dir: Path, out_dir: Path) -> None:
     print(f"[info] Full rebuild: {input_dir} -> {out_dir}")
     if out_dir.exists():
         shutil.rmtree(out_dir)
     out_dir.mkdir(parents=True)
 
+    git_commit = get_git_commit()
     registry_path = input_dir / "market_registry.jsonl"
     markets = load_market_registry(registry_path)
     write_market_registry_json(markets, out_dir / "market_registry.json")
-    write_landing_page(out_dir)
+    write_landing_page(out_dir, markets, git_commit)
+    write_states_page(out_dir, markets)
     convert_all_markets(input_dir, out_dir)
     print(f"[info] Done. {len(markets)} market(s) processed.")
 
@@ -568,6 +804,12 @@ def build_parser() -> argparse.ArgumentParser:
             "(incremental rebuild). Including a registry file forces a full rebuild."
         ),
     )
+    parser.add_argument(
+        "--ui",
+        action="store_true",
+        default=False,
+        help="Only regenerate index.html and states.html (fast UI-only rebuild).",
+    )
     return parser
 
 
@@ -580,6 +822,10 @@ def main() -> None:
 
     if not input_dir.is_dir():
         sys.exit(f"[error] Input directory not found: {input_dir}")
+
+    if args.ui:
+        ui_rebuild(input_dir, out_dir)
+        return
 
     if needs_full_rebuild(input_dir, out_dir, args.changed):
         full_rebuild(input_dir, out_dir)

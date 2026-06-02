@@ -1,47 +1,42 @@
 # Bloomingdale Farmers Market
 
 ## Summary
-A community-based, producer-only market in the heart of Bloomingdale NW Washington DC running year-round every Sunday with regional farmers, bakers, and producers plus rotating pop-up vendors and local artisans.
+Community-built grower-only market anchoring the 100 block of R Street NW with live music, chef demos, and a rotating lineup of Chesapeake farms, bakers, cheesemakers, flowers, and pantry goods year-round.
 
 ## Location
-
 - Address: 100 R St NW
 - City: Washington
 - State: DC
 - ZIP: 20001
-- Latitude: 
-- Longitude: 
+- Latitude: 38.9127
+- Longitude: -77.0123
 
 ## Schedule
 - Day: Sunday
 - Hours: 9:00 AM – 1:00 PM
 - Season: Year-round
-- Type: outdoor
+- Type: outdoor street closure on R St NW between 1st St N
 
 ## URL
-<a href="https://marketsandmore.info/markets/bloomingdale-farmers-market/">https://marketsandmore.info/markets/bloomingdale-farmers-market/</a>
+https://www.bloomingdalemarket-dc.com/
 
 ## Logo
 
+
 ## Tags
-- producer-only
-- year-round
 - SNAP
-- Bonus Bucks
-- Chesapeake-watershed
-- sunday
+- FreshMatch
+- Produce Plus
+- music
+- grower-only
 
 ## First Created
-2026-05-30T00:00:00Z
+2026-03-18 00:29:50.287201+00
 
 ## Last Modified
-2026-05-30T00:00:00Z
+2026-05-12 01:21:41.2747+00
 
 ## Sources
-
-### Source 1
-- Timestamp: 2026-05-30T00:00:00Z
-- Type: Website scrape
-- Source slug: marketsandmore-info
-- Agent: wiki_agent
-- Notes: New market created from marketsandmore.info website. Located on 100 block of R Street NW between 1st Street and Florida Avenue. Producer-only, all vendors source from Chesapeake Watershed. Accepts SNAP/EBT with Bonus Bucks matching program. Managed by Markets & More.
+- Type: backend.csv
+- Source: official website
+- Ingested: 2026-06-02

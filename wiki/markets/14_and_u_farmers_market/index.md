@@ -4,7 +4,6 @@
 Hyper-local producer-only market beside the Reeves Center where U Street neighbors stock up on heirloom produce, fresh pasta, cheeses, bread, and stitched goods each Saturday morning May–Nov.
 
 ## Location
-
 - Address: 1400 U St NW
 - City: Washington
 - State: DC
@@ -14,14 +13,15 @@ Hyper-local producer-only market beside the Reeves Center where U Street neighbo
 
 ## Schedule
 - Day: Saturday
-- Hours: 9:00 AM – 1:00 PM
+- Hours: Sat 9:00 AM - 1:00 PM
 - Season: May – November
-- Type: outdoor
+- Type: outdoor sidewalk/plaza at 14th & U St NW next to t
 
 ## URL
-<a href="https://marketsandmore.info/">https://marketsandmore.info/</a>
+https://marketsandmore.info/
 
 ## Logo
+
 
 ## Tags
 - SNAP
@@ -31,23 +31,12 @@ Hyper-local producer-only market beside the Reeves Center where U Street neighbo
 - Ward 1
 
 ## First Created
-2026-03-18T00:29:50Z
+2026-03-18 00:29:50.141831+00
 
 ## Last Modified
-2026-05-30T00:00:00Z
+2026-05-12 01:31:56.907042+00
 
 ## Sources
-
-### Source 1
-- Timestamp: 2026-05-30T00:00:00Z
-- Type: CSV import
-- File: sap1.csv
-- Agent: wiki_agent
-- Notes: Initial wiki creation from CSV source data. Market is_active=FALSE per source.
-
-### Source 2
-- Timestamp: 2026-05-30T00:00:00Z
-- Type: Website scrape
-- Source slug: marketsandmore-info
-- Agent: wiki_agent
-- Notes: Website confirms market details (Saturdays 9am-1pm, May-November, Reeves Center 14th & U NW). Producer-only, Chesapeake Watershed vendors. No specific vendor list extracted; source does not enumerate individual vendors for this market. New related market Bloomingdale Farmers Market created from same source.
+- Type: backend.csv
+- Source: official website
+- Ingested: 2026-06-02

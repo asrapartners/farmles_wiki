@@ -4,7 +4,6 @@
 A historic North Shore staple in a dedicated 1911 pavilion offering cool-climate produce and local honey.
 
 ## Location
-
 - Address: 1324 E 3rd St
 - City: Duluth
 - State: MN
@@ -19,9 +18,10 @@ A historic North Shore staple in a dedicated 1911 pavilion offering cool-climate
 - Type: outdoor
 
 ## URL
-<a href="https://www.duluthfarmersmarket.com/">https://www.duluthfarmersmarket.com/</a>
+https://www.duluthfarmersmarket.com/
 
 ## Logo
+
 
 ## Tags
 - north-shore
@@ -29,23 +29,12 @@ A historic North Shore staple in a dedicated 1911 pavilion offering cool-climate
 - cool-climate
 
 ## First Created
-2026-02-18T01:49:18Z
+2026-02-18 01:49:18.140848+00
 
 ## Last Modified
-2026-05-30T00:00:00Z
+2026-05-05 21:28:13.295863+00
 
 ## Sources
-
-### Source 1
-- Timestamp: 2026-05-30T00:00:00Z
-- Type: CSV import
-- File: sap1.csv
-- Agent: wiki_agent
-- Notes: Initial wiki creation from CSV source data.
-
-### Source 2
-- Timestamp: 2026-05-30T00:00:00Z
-- Type: Website scrape
-- Source slug: duluthfarmersmarket-com
-- Agent: wiki_agent
-- Notes: Source pages yielded no substantive content beyond page titles and URLs. Market homepage confirmed site title "Duluth Farmers Market – Open Since 1911". No vendor or schedule details extracted. Notes: Vendor information not found.
+- Type: backend.csv
+- Source: official website
+- Ingested: 2026-06-02
